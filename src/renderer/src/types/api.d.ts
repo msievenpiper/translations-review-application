@@ -1,3 +1,7 @@
+type AuditRequest =
+  | { type: 'url';  projectId: string; url: string; userAgent?: string; acceptLanguage?: string }
+  | { type: 'file'; projectId: string; filePath: string; fileType: 'html' | 'json' | 'csv' }
+
 declare global {
   interface Window {
     api: {
@@ -8,7 +12,7 @@ declare global {
         delete: (id: string)            => Promise<void>
       }
       audit: {
-        run:      (req: any)          => Promise<any>
+        run:      (req: AuditRequest) => Promise<any>
         get:      (auditId: string)   => Promise<any>
         history:  (projectId: string) => Promise<any[]>
         delete:   (auditId: string)   => Promise<void>
