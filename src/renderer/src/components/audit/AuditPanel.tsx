@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getErrorInfo } from '../../utils/errorMessages'
 
 type InputMode = 'url' | 'file'
 type FileType = 'html' | 'json' | 'csv'
@@ -57,6 +59,8 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
     input.click()
   }
 
+  const errorInfo = error ? getErrorInfo(error) : null
+
   return (
     <div className="p-4 space-y-3">
       {/* Mode toggle */}
@@ -114,9 +118,14 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
       )}
 
       {/* Error */}
-      {error && (
-        <div className="bg-red-950 border border-red-800 rounded px-3 py-2 text-xs text-red-300">
-          {error}
+      {errorInfo && (
+        <div className="bg-red-950 border border-red-800 rounded px-3 py-2 text-xs text-red-300 space-y-1">
+          <p>{errorInfo.message}</p>
+          {errorInfo.goToSettings && (
+            <Link to="/settings" className="text-blue-400 hover:text-blue-300 underline">
+              Go to Settings →
+            </Link>
+          )}
         </div>
       )}
 
