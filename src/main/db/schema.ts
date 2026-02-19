@@ -24,4 +24,14 @@ export function applySchema(db: Database.Database): void {
       created_at    INTEGER NOT NULL DEFAULT (unixepoch())
     );
   `)
+
+  // Idempotent column migrations — safe to run on existing databases
+  const auditCols = (db.prepare("PRAGMA table_info(audits)").all() as { name: string }[]).map(c => c.name)
+
+  if (!auditCols.includes('html_snapshot')) {
+    db.exec("ALTER TABLE audits ADD COLUMN html_snapshot TEXT NOT NULL DEFAULT ''")
+  }
+  if (!auditCols.includes('rubric_weights')) {
+    db.exec("ALTER TABLE audits ADD COLUMN rubric_weights TEXT NOT NULL DEFAULT '{}'")
+  }
 }
