@@ -1,10 +1,14 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // We test the factory and error behavior without hitting live APIs
 describe('createAiClient', () => {
   it('returns an object with an evaluate method for claude', async () => {
     const { createAiClient } = await import('../../../src/main/ai/index')
-    const client = createAiClient({ provider: 'claude', apiKey: 'test-key', model: 'claude-sonnet-4-6' })
+    const client = createAiClient({
+      provider: 'claude',
+      apiKey: 'test-key',
+      model: 'claude-sonnet-4-6'
+    })
     expect(typeof client.evaluate).toBe('function')
   })
 
@@ -17,7 +21,7 @@ describe('createAiClient', () => {
   it('throws for an unknown provider', async () => {
     const { createAiClient } = await import('../../../src/main/ai/index')
     expect(() =>
-      createAiClient({ provider: 'unknown' as any, apiKey: 'x', model: 'x' })
+      createAiClient({ provider: 'unknown' as unknown as 'claude', apiKey: 'x', model: 'x' })
     ).toThrow(/unknown provider/)
   })
 })

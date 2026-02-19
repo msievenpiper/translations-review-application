@@ -3,24 +3,24 @@ import { useState, useCallback } from 'react'
 export type RubricCategory = 'accuracy' | 'fluency' | 'completeness' | 'tone'
 
 export interface RubricWeights {
-  accuracy:     number
-  fluency:      number
+  accuracy: number
+  fluency: number
   completeness: number
-  tone:         number
+  tone: number
 }
 
 export interface CategoryScores {
-  accuracy?:     number
-  fluency?:      number
+  accuracy?: number
+  fluency?: number
   completeness?: number
-  tone?:         number
+  tone?: number
 }
 
 export const DEFAULT_WEIGHTS: RubricWeights = {
-  accuracy:     40,
-  fluency:      20,
+  accuracy: 40,
+  fluency: 20,
   completeness: 30,
-  tone:         10,
+  tone: 10
 }
 
 const CATEGORIES: RubricCategory[] = ['accuracy', 'fluency', 'completeness', 'tone']
@@ -34,14 +34,20 @@ function calcScore(scores: CategoryScores, weights: RubricWeights): number {
   return Math.round(weighted / totalWeight)
 }
 
-export function useScore(initialWeights: RubricWeights = DEFAULT_WEIGHTS) {
-  const [weights, setWeights]       = useState<RubricWeights>(initialWeights)
+export function useScore(initialWeights: RubricWeights = DEFAULT_WEIGHTS): {
+  weights: RubricWeights
+  updateWeight: (cat: RubricCategory, value: number) => void
+  categoryScores: CategoryScores
+  setCategoryScores: (scores: CategoryScores) => void
+  computedScore: number
+} {
+  const [weights, setWeights] = useState<RubricWeights>(initialWeights)
   const [categoryScores, setScores] = useState<CategoryScores>({})
 
   const computedScore = calcScore(categoryScores, weights)
 
   const updateWeight = useCallback((cat: RubricCategory, value: number) => {
-    setWeights(prev => ({ ...prev, [cat]: value }))
+    setWeights((prev) => ({ ...prev, [cat]: value }))
   }, [])
 
   const setCategoryScores = useCallback((scores: CategoryScores) => {

@@ -1,7 +1,8 @@
+import type { JSX } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 
-export function AppShell() {
+export function AppShell(): JSX.Element {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-gray-950 text-gray-100">
       <Sidebar />

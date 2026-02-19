@@ -1,31 +1,37 @@
-import { useRef, useEffect } from 'react'
+import { type JSX, useRef, useEffect } from 'react'
 
 export interface AnnotationIssue {
-  id:       number
-  text:     string
+  id: number
+  text: string
   category: string
   severity: 'low' | 'medium' | 'high'
 }
 
 interface Props {
-  url:               string | null
-  issues:            AnnotationIssue[]
+  url: string | null
+  issues: AnnotationIssue[]
   onAnnotationClick: (id: number) => void
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low:    '#fbbf24',
+  low: '#fbbf24',
   medium: '#f97316',
-  high:   '#ef4444',
+  high: '#ef4444'
+}
+
+type ElectronWebview = HTMLElement & {
+  executeJavaScript: (script: string) => Promise<unknown>
+  addEventListener: (event: string, handler: () => void) => void
+  removeEventListener: (event: string, handler: () => void) => void
 }
 
 function buildAnnotationScript(issues: AnnotationIssue[]): string {
   const serialized = JSON.stringify(
     issues.map((issue, idx) => ({
-      id:     issue.id,
-      text:   issue.text,
-      color:  SEVERITY_COLORS[issue.severity] ?? SEVERITY_COLORS.medium,
-      badge:  idx + 1,
+      id: issue.id,
+      text: issue.text,
+      color: SEVERITY_COLORS[issue.severity] ?? SEVERITY_COLORS.medium,
+      badge: idx + 1
     }))
   )
 
@@ -67,15 +73,15 @@ function buildAnnotationScript(issues: AnnotationIssue[]): string {
 `.trim()
 }
 
-export function AnnotatedWebview({ url, issues, onAnnotationClick }: Props) {
-  const wvRef = useRef<HTMLElement>(null)
+export function AnnotatedWebview({ url, issues, onAnnotationClick }: Props): JSX.Element {
+  const wvRef = useRef<ElectronWebview>(null)
 
   useEffect(() => {
-    const wv = wvRef.current as any
+    const wv = wvRef.current
     if (!wv || !url) return
 
-    function onDomReady() {
-      if (!issues.length) return
+    function onDomReady(): void {
+      if (!wv || !issues.length) return
       const script = buildAnnotationScript(issues)
       wv.executeJavaScript(script).catch(console.error)
     }
@@ -86,7 +92,7 @@ export function AnnotatedWebview({ url, issues, onAnnotationClick }: Props) {
 
   // Listen for postMessage from the webview content
   useEffect(() => {
-    function onMessage(e: MessageEvent) {
+    function onMessage(e: MessageEvent): void {
       if (e.data?.type === 'audit-click') {
         onAnnotationClick(e.data.id)
       }
@@ -101,7 +107,9 @@ export function AnnotatedWebview({ url, issues, onAnnotationClick }: Props) {
         <div className="text-center">
           <div className="text-4xl mb-3 opacity-30">🌐</div>
           <p className="text-gray-500 text-sm">Enter a URL and run an audit</p>
-          <p className="text-gray-600 text-xs mt-1">The audited page will appear here with highlights</p>
+          <p className="text-gray-600 text-xs mt-1">
+            The audited page will appear here with highlights
+          </p>
         </div>
       </div>
     )
@@ -109,11 +117,6 @@ export function AnnotatedWebview({ url, issues, onAnnotationClick }: Props) {
 
   return (
     // @ts-ignore — webview is an Electron-specific element not in standard React JSX types
-    <webview
-      ref={wvRef}
-      src={url}
-      className="w-full h-full"
-      style={{ display: 'flex', flex: 1 }}
-    />
+    <webview ref={wvRef} src={url} className="w-full h-full" style={{ display: 'flex', flex: 1 }} />
   )
 }

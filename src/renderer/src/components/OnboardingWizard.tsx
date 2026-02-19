@@ -1,29 +1,39 @@
-import { useState } from 'react'
+import { type JSX, useState } from 'react'
 
 const PROVIDERS = [
-  { id: 'claude', label: 'Claude', defaultModel: 'claude-sonnet-4-6', docsUrl: 'https://console.anthropic.com/settings/keys' },
-  { id: 'openai', label: 'OpenAI', defaultModel: 'gpt-4o', docsUrl: 'https://platform.openai.com/api-keys' },
+  {
+    id: 'claude',
+    label: 'Claude',
+    defaultModel: 'claude-sonnet-4-6',
+    docsUrl: 'https://console.anthropic.com/settings/keys'
+  },
+  {
+    id: 'openai',
+    label: 'OpenAI',
+    defaultModel: 'gpt-4o',
+    docsUrl: 'https://platform.openai.com/api-keys'
+  }
 ]
 
 interface Props {
   onComplete: () => void
 }
 
-export function OnboardingWizard({ onComplete }: Props) {
-  const [step, setStep]         = useState<1 | 2 | 3>(1)
-  const [provider, setProvider] = useState('claude')
-  const [apiKey, setApiKey]     = useState('')
-  const [saving, setSaving]     = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+export function OnboardingWizard({ onComplete }: Props): JSX.Element {
+  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [provider, setProvider] = useState<'claude' | 'openai'>('claude')
+  const [apiKey, setApiKey] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const selectedProvider = PROVIDERS.find(p => p.id === provider) ?? PROVIDERS[0]
+  const selectedProvider = PROVIDERS.find((p) => p.id === provider) ?? PROVIDERS[0]
 
-  function handleProviderChange(id: string) {
-    setProvider(id)
+  function handleProviderChange(id: string): void {
+    setProvider(id as 'claude' | 'openai')
     setError(null)
   }
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     if (!apiKey.trim()) {
       setError('Please enter an API key to continue.')
       return
@@ -34,12 +44,12 @@ export function OnboardingWizard({ onComplete }: Props) {
       await window.api.settings.save({
         provider,
         model: selectedProvider.defaultModel,
-        apiKey: apiKey.trim(),
+        apiKey: apiKey.trim()
       })
       setStep(3)
       setTimeout(() => onComplete(), 1500)
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to save settings.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save settings.')
     } finally {
       setSaving(false)
     }
@@ -48,14 +58,13 @@ export function OnboardingWizard({ onComplete }: Props) {
   return (
     <div className="fixed inset-0 z-50 bg-gray-950/80 backdrop-blur-sm flex items-center justify-center">
       <div className="bg-gray-900 border border-gray-700 rounded-xl p-8 w-full max-w-md shadow-2xl">
-
         {/* Step 1 – Welcome */}
         {step === 1 && (
           <div className="text-center space-y-4">
             <div className="text-4xl mb-2">🌐</div>
             <h1 className="text-2xl font-semibold text-gray-100">Translation Auditor</h1>
             <p className="text-gray-400 text-sm leading-relaxed">
-              AI-powered review of translated web pages. Let's get you set up in just a moment.
+              AI-powered review of translated web pages. Let&apos;s get you set up in just a moment.
             </p>
             <button
               onClick={() => setStep(2)}
@@ -78,7 +87,7 @@ export function OnboardingWizard({ onComplete }: Props) {
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5">AI Provider</label>
               <div className="flex gap-2">
-                {PROVIDERS.map(p => (
+                {PROVIDERS.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => handleProviderChange(p.id)}
@@ -100,21 +109,21 @@ export function OnboardingWizard({ onComplete }: Props) {
               <input
                 type="password"
                 value={apiKey}
-                onChange={e => { setApiKey(e.target.value); setError(null) }}
-                onKeyDown={e => e.key === 'Enter' && !saving && handleSave()}
+                onChange={(e) => {
+                  setApiKey(e.target.value)
+                  setError(null)
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && !saving && handleSave()}
                 placeholder={provider === 'claude' ? 'sk-ant-…' : 'sk-…'}
                 className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm font-mono text-gray-100 focus:outline-none focus:border-blue-500"
                 autoFocus
               />
               <p className="text-xs text-gray-500 mt-1.5">
-                Get your key at{' '}
-                <span className="text-blue-400">{selectedProvider.docsUrl}</span>
+                Get your key at <span className="text-blue-400">{selectedProvider.docsUrl}</span>
               </p>
             </div>
 
-            {error && (
-              <p className="text-xs text-red-400">{error}</p>
-            )}
+            {error && <p className="text-xs text-red-400">{error}</p>}
 
             <button
               onClick={handleSave}
@@ -130,7 +139,7 @@ export function OnboardingWizard({ onComplete }: Props) {
         {step === 3 && (
           <div className="text-center space-y-3">
             <div className="text-4xl">✓</div>
-            <h2 className="text-lg font-semibold text-gray-100">You're all set!</h2>
+            <h2 className="text-lg font-semibold text-gray-100">You&apos;re all set!</h2>
             <p className="text-gray-400 text-sm">Launching the app…</p>
           </div>
         )}
