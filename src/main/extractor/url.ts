@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer'
 
 export interface FetchResult {
   html:     string
+  mhtml:    string
   finalUrl: string
   title:    string
 }
@@ -59,10 +60,13 @@ export async function fetchPageHtml(
     }
 
     const html     = await page.content()
+    const client   = await page.createCDPSession()
+    const { data: mhtml } = await client.send('Page.captureSnapshot', { format: 'mhtml' })
+    await client.detach()
     const finalUrl = page.url()
     const title    = await page.title()
 
-    return { html, finalUrl, title }
+    return { html, mhtml, finalUrl, title }
   } finally {
     await browser.close()
   }

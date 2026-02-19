@@ -44,7 +44,7 @@ export function registerAuditHandlers(): void {
       if (!fetched.html?.trim()) {
         throw new Error(`Fetched page returned empty HTML for URL: ${req.url}`)
       }
-      htmlSnapshot = fetched.html
+      htmlSnapshot = fetched.mhtml
       const extracted = extractTextFromHtml(fetched.html)
       targetText = extracted.allText
       sourceText = targetText
@@ -130,7 +130,10 @@ export function registerAuditHandlers(): void {
     const { join } = await import('path')
     const { writeFileSync } = await import('fs')
 
-    const tempPath = join(app.getPath('temp'), 'audit-preview.html')
+    const isMhtml = row.html_snapshot.startsWith('MIME-Version:') ||
+                    row.html_snapshot.startsWith('From -')
+    const ext      = isMhtml ? 'mhtml' : 'html'
+    const tempPath = join(app.getPath('temp'), `audit-preview.${ext}`)
     writeFileSync(tempPath, row.html_snapshot, 'utf-8')
     return `file://${tempPath}`
   })
