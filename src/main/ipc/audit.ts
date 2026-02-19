@@ -34,9 +34,11 @@ export function registerAuditHandlers(): void {
     let targetText = ''
     let sourceText = ''
     let inputRef = ''
+    let htmlSnapshot = ''
 
     if (req.type === 'url') {
       const fetched = await fetchPageHtml(req.url)
+      htmlSnapshot = fetched.html
       const extracted = extractTextFromHtml(fetched.html)
       targetText = extracted.allText
       sourceText = targetText
@@ -52,6 +54,7 @@ export function registerAuditHandlers(): void {
         targetText = pairs.map(p => `${p.key}: ${p.value}`).join('\n')
         sourceText = targetText
       } else {
+        htmlSnapshot = raw
         const extracted = extractTextFromHtml(raw)
         targetText = extracted.allText
         sourceText = targetText
@@ -75,8 +78,8 @@ export function registerAuditHandlers(): void {
 
     const auditId = randomUUID()
     db.prepare(`
-      INSERT INTO audits (id, project_id, input_type, input_ref, ai_results, final_score)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO audits (id, project_id, input_type, input_ref, ai_results, final_score, html_snapshot, rubric_weights)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       auditId,
       project.id,
@@ -84,6 +87,8 @@ export function registerAuditHandlers(): void {
       inputRef,
       JSON.stringify(result.categoryResults),
       result.finalScore,
+      htmlSnapshot,
+      project.rubric_config,
     )
 
     return { ...result, auditId }
