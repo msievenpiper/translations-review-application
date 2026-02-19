@@ -2,6 +2,10 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { initDb } from './db/index'
+import { registerAuditHandlers }    from './ipc/audit'
+import { registerProjectHandlers }  from './ipc/projects'
+import { registerSettingsHandlers } from './ipc/settings'
 
 function createWindow(): void {
   // Create the browser window.
@@ -51,6 +55,14 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // Initialize database with persistent path
+  initDb(join(app.getPath('userData'), 'auditor.db'))
+
+  // Register IPC handlers
+  registerAuditHandlers()
+  registerProjectHandlers()
+  registerSettingsHandlers()
 
   createWindow()
 

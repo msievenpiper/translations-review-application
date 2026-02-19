@@ -1,22 +1,22 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
 
-// Custom APIs for renderer
-const api = {}
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
-}
+contextBridge.exposeInMainWorld('api', {
+  projects: {
+    list:   ()                      => ipcRenderer.invoke('projects:list'),
+    create: (data: any)             => ipcRenderer.invoke('projects:create', data),
+    update: (id: string, data: any) => ipcRenderer.invoke('projects:update', id, data),
+    delete: (id: string)            => ipcRenderer.invoke('projects:delete', id),
+  },
+  audit: {
+    run:     (req: any)             => ipcRenderer.invoke('audit:run', req),
+    history: (projectId: string)    => ipcRenderer.invoke('audit:history', projectId),
+    delete:  (auditId: string)      => ipcRenderer.invoke('audit:delete', auditId),
+  },
+  settings: {
+    load: ()          => ipcRenderer.invoke('settings:load'),
+    save: (data: any) => ipcRenderer.invoke('settings:save', data),
+  },
+  export: {
+    report: (auditId: string) => ipcRenderer.invoke('export:report', auditId),
+  },
+})

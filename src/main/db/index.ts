@@ -3,12 +3,18 @@ import { applySchema } from './schema'
 
 let _db: Database.Database | null = null
 
-export function getDb(dbPath?: string): Database.Database {
+export function initDb(dbPath: string): void {
+  if (_db) return // already initialized
+  _db = new Database(dbPath)
+  _db.pragma('journal_mode = WAL')
+  _db.pragma('foreign_keys = ON')
+  applySchema(_db)
+}
+
+export function getDb(): Database.Database {
   if (!_db) {
-    // In Electron main process, caller passes app.getPath('userData') + '/auditor.db'
-    // In tests, use ':memory:' or a provided path
-    const resolvedPath = dbPath ?? ':memory:'
-    _db = new Database(resolvedPath)
+    // Fallback for tests: in-memory database
+    _db = new Database(':memory:')
     _db.pragma('journal_mode = WAL')
     _db.pragma('foreign_keys = ON')
     applySchema(_db)
