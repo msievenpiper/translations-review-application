@@ -3,14 +3,44 @@ import { getDb } from '../db/index'
 import path from 'path'
 import { writeFileSync } from 'fs'
 
+interface AuditRow {
+  project_id: string
+  input_type: string
+  input_ref: string
+  ai_results: string
+  final_score: number
+  created_at: number
+}
+
+interface ProjectRow {
+  name?: string
+}
+
+interface CategoryResult {
+  category: string
+  score: number
+  issues: IssueRow[]
+}
+
+interface IssueRow {
+  severity?: string
+  translated_text?: string
+  suggestion?: string
+  reason?: string
+}
+
 export function registerExportHandlers(): void {
   ipcMain.handle('export:report', async (_event, auditId: string) => {
     const db = getDb()
-    const audit = db.prepare('SELECT * FROM audits WHERE id = ?').get(auditId) as any
+    const audit = db.prepare('SELECT * FROM audits WHERE id = ?').get(auditId) as
+      | AuditRow
+      | undefined
     if (!audit) throw new Error(`Audit not found: ${auditId}`)
 
-    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(audit.project_id) as any
-    const categories = JSON.parse(audit.ai_results ?? '[]') as any[]
+    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(audit.project_id) as
+      | ProjectRow
+      | undefined
+    const categories = JSON.parse(audit.ai_results ?? '[]') as CategoryResult[]
 
     const html = buildReportHtml(audit, project, categories)
 
@@ -37,12 +67,19 @@ function scoreColor(score: number): string {
   return '#ef4444'
 }
 
-function buildReportHtml(audit: any, project: any, categories: any[]): string {
+function buildReportHtml(
+  audit: AuditRow,
+  project: ProjectRow | undefined,
+  categories: CategoryResult[]
+): string {
   const score = Math.round(audit.final_score ?? 0)
-  const date  = new Date(audit.created_at * 1000).toLocaleString()
+  const date = new Date(audit.created_at * 1000).toLocaleString()
 
-  const categoryRows = categories.map((cat: any) => {
-    const issueRows = (cat.issues ?? []).map((issue: any) => `
+  const categoryRows = categories
+    .map((cat) => {
+      const issueRows = (cat.issues ?? [])
+        .map(
+          (issue) => `
       <tr>
         <td class="issue-cat">${esc(cat.category)}</td>
         <td class="sev-${esc(issue.severity ?? 'medium')}">${esc(issue.severity ?? 'medium')}</td>
@@ -50,8 +87,10 @@ function buildReportHtml(audit: any, project: any, categories: any[]): string {
         <td class="suggestion">${esc(issue.suggestion)}</td>
         <td class="reason">${esc(issue.reason)}</td>
       </tr>
-    `).join('')
-    return `
+    `
+        )
+        .join('')
+      return `
       <tr class="cat-header">
         <td colspan="5">
           <strong>${esc(cat.category.toUpperCase())}</strong>
@@ -60,7 +99,8 @@ function buildReportHtml(audit: any, project: any, categories: any[]): string {
       </tr>
       ${issueRows || '<tr><td colspan="5" class="no-issues">No issues found for this category.</td></tr>'}
     `
-  }).join('')
+    })
+    .join('')
 
   return `<!DOCTYPE html>
 <html lang="en">

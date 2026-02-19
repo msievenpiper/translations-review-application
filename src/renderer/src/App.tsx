@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { type JSX, useState, useEffect } from 'react'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
 import { AuditPage } from './pages/AuditPage'
@@ -7,13 +7,16 @@ import { HistoryDetailPage } from './pages/HistoryDetailPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { OnboardingWizard } from './components/OnboardingWizard'
 
-export function App() {
+export function App(): JSX.Element {
   const [showOnboarding, setShowOnboarding] = useState(true)
 
   useEffect(() => {
-    window.api.settings.load().then((s: any) => {
-      if (s?.apiKey) setShowOnboarding(false)
-    }).catch(() => setShowOnboarding(false))
+    window.api.settings
+      .load()
+      .then((s) => {
+        if (s?.apiKey) setShowOnboarding(false)
+      })
+      .catch(() => setShowOnboarding(false))
   }, [])
 
   return (
@@ -29,9 +32,7 @@ export function App() {
         </Routes>
       </HashRouter>
 
-      {showOnboarding && (
-        <OnboardingWizard onComplete={() => setShowOnboarding(false)} />
-      )}
+      {showOnboarding && <OnboardingWizard onComplete={() => setShowOnboarding(false)} />}
     </>
   )
 }

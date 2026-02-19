@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 interface AuditRecord {
-  id:             string
-  project_id:     string
-  input_type:     'url' | 'file'
-  input_ref:      string
-  final_score:    number
+  id: string
+  project_id: string
+  input_type: 'url' | 'file'
+  input_ref: string
+  final_score: number
   rubric_weights: string
-  created_at:     number
+  created_at: number
 }
 
 function scoreColor(score: number): string {
@@ -20,36 +20,44 @@ function scoreColor(score: number): string {
 function formatDate(unixSecs: number): string {
   return new Date(unixSecs * 1000).toLocaleString(undefined, {
     dateStyle: 'medium',
-    timeStyle: 'short',
+    timeStyle: 'short'
   })
 }
 
-export function HistoryPage() {
+export function HistoryPage(): JSX.Element {
   const navigate = useNavigate()
-  const [audits, setAudits]   = useState<AuditRecord[]>([])
+  const [audits, setAudits] = useState<AuditRecord[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   // Filter state
-  const [search,   setSearch]   = useState('')
+  const [search, setSearch] = useState('')
   const [minScore, setMinScore] = useState('')
   const [maxScore, setMaxScore] = useState('')
   const [fromDate, setFromDate] = useState('')
-  const [toDate,   setToDate]   = useState('')
+  const [toDate, setToDate] = useState('')
 
   useEffect(() => {
-    window.api.audit.history('default')
-      .then((data: any[]) => { setAudits(data); setLoading(false) })
-      .catch((e: any)     => { setError(e?.message ?? 'Failed to load history'); setLoading(false) })
+    window.api.audit
+      .history('default')
+      .then((data) => {
+        setAudits(data)
+        setLoading(false)
+      })
+      .catch((e) => {
+        setError(e instanceof Error ? e.message : 'Failed to load history')
+        setLoading(false)
+      })
   }, [])
 
-  function handleDelete(auditId: string) {
-    window.api.audit.delete(auditId)
-      .then(() => setAudits(prev => prev.filter(a => a.id !== auditId)))
-      .catch((e: any) => alert(`Delete failed: ${e?.message ?? 'unknown error'}`))
+  function handleDelete(auditId: string): void {
+    window.api.audit
+      .delete(auditId)
+      .then(() => setAudits((prev) => prev.filter((a) => a.id !== auditId)))
+      .catch((e) => alert(`Delete failed: ${e instanceof Error ? e.message : 'unknown error'}`))
   }
 
-  const filtered = audits.filter(a => {
+  const filtered = audits.filter((a) => {
     if (search && !(a.input_ref ?? '').toLowerCase().includes(search.toLowerCase())) return false
     if (minScore !== '' && (a.final_score ?? 0) < Number(minScore)) return false
     if (maxScore !== '' && (a.final_score ?? 0) > Number(maxScore)) return false
@@ -65,7 +73,12 @@ export function HistoryPage() {
   })
 
   if (loading) return <div className="p-8 text-gray-400 text-sm">Loading history…</div>
-  if (error)   return <div className="p-8"><p className="text-red-400 text-sm">{error}</p></div>
+  if (error)
+    return (
+      <div className="p-8">
+        <p className="text-red-400 text-sm">{error}</p>
+      </div>
+    )
 
   return (
     <div className="p-6 max-w-3xl">
@@ -77,35 +90,37 @@ export function HistoryPage() {
           type="text"
           placeholder="Search URL or file…"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           className="flex-1 min-w-40 bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500"
         />
         <input
           type="number"
           placeholder="Min score"
-          min={0} max={100}
+          min={0}
+          max={100}
           value={minScore}
-          onChange={e => setMinScore(e.target.value)}
+          onChange={(e) => setMinScore(e.target.value)}
           className="w-24 bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500"
         />
         <input
           type="number"
           placeholder="Max score"
-          min={0} max={100}
+          min={0}
+          max={100}
           value={maxScore}
-          onChange={e => setMaxScore(e.target.value)}
+          onChange={(e) => setMaxScore(e.target.value)}
           className="w-24 bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500"
         />
         <input
           type="date"
           value={fromDate}
-          onChange={e => setFromDate(e.target.value)}
+          onChange={(e) => setFromDate(e.target.value)}
           className="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 focus:outline-none focus:border-blue-500"
         />
         <input
           type="date"
           value={toDate}
-          onChange={e => setToDate(e.target.value)}
+          onChange={(e) => setToDate(e.target.value)}
           className="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 focus:outline-none focus:border-blue-500"
         />
       </div>
@@ -113,19 +128,23 @@ export function HistoryPage() {
       {filtered.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-4xl opacity-20 mb-3">📋</div>
-          <p className="text-gray-500 text-sm">{audits.length === 0 ? 'No audits yet.' : 'No audits match the filters.'}</p>
+          <p className="text-gray-500 text-sm">
+            {audits.length === 0 ? 'No audits yet.' : 'No audits match the filters.'}
+          </p>
           {audits.length === 0 && (
             <p className="text-gray-600 text-xs mt-1">Run your first audit from the Audit tab.</p>
           )}
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map(audit => (
+          {filtered.map((audit) => (
             <div
               key={audit.id}
               className="flex items-center gap-4 bg-gray-800 hover:bg-gray-750 rounded-lg p-4 group"
             >
-              <div className={`text-2xl font-bold tabular-nums w-12 text-right shrink-0 ${scoreColor(Math.round(audit.final_score ?? 0))}`}>
+              <div
+                className={`text-2xl font-bold tabular-nums w-12 text-right shrink-0 ${scoreColor(Math.round(audit.final_score ?? 0))}`}
+              >
                 {Math.round(audit.final_score ?? 0)}
               </div>
 
@@ -134,7 +153,9 @@ export function HistoryPage() {
                   {audit.input_ref}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-gray-500 uppercase font-mono">{audit.input_type}</span>
+                  <span className="text-xs text-gray-500 uppercase font-mono">
+                    {audit.input_type}
+                  </span>
                   <span className="text-gray-700">·</span>
                   <span className="text-xs text-gray-500">{formatDate(audit.created_at)}</span>
                 </div>

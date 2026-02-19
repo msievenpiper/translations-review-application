@@ -39,6 +39,7 @@ npm run build:linux
 This is an Electron app using `electron-vite` for the build pipeline. It follows the standard Electron three-process model:
 
 ### Main Process (`src/main/`)
+
 Handles all privileged operations: file system, database, AI API calls, and settings.
 
 - **`index.ts`** — App entry. Initializes DB at `userData/auditor.db`, registers IPC handlers, creates the BrowserWindow.
@@ -50,9 +51,11 @@ Handles all privileged operations: file system, database, AI API calls, and sett
 - **`scoring/engine.ts`** — Orchestrates an audit: iterates over the 4 rubric categories (`accuracy`, `fluency`, `completeness`, `tone`), calls the AI client for each, then computes a weighted final score.
 
 ### Preload (`src/preload/index.ts`)
+
 Exposes `window.api` to the renderer via `contextBridge`. The full API surface is typed in `src/renderer/src/types/api.d.ts`.
 
 ### Renderer (`src/renderer/src/`)
+
 Standard React 19 + React Router 7 (HashRouter) SPA.
 
 - **`App.tsx`** — Root. Checks for a saved API key on load; shows `OnboardingWizard` if none found.

@@ -1,20 +1,21 @@
+import type { JSX } from 'react'
 import type { RubricWeights, CategoryScores, RubricCategory } from '../../hooks/useScore'
 
 interface Props {
-  score:           number
-  weights:         RubricWeights
-  categoryScores:  CategoryScores
-  onWeightChange:  (cat: RubricCategory, value: number) => void
-  customRules:     string
-  onCustomRules:   (v: string) => void
-  disabled:        boolean
+  score: number
+  weights: RubricWeights
+  categoryScores: CategoryScores
+  onWeightChange: (cat: RubricCategory, value: number) => void
+  customRules: string
+  onCustomRules: (v: string) => void
+  disabled: boolean
 }
 
 const CATEGORIES: { key: RubricCategory; label: string }[] = [
-  { key: 'accuracy',     label: 'Accuracy' },
-  { key: 'fluency',      label: 'Fluency' },
+  { key: 'accuracy', label: 'Accuracy' },
+  { key: 'fluency', label: 'Fluency' },
   { key: 'completeness', label: 'Completeness' },
-  { key: 'tone',         label: 'Tone & Style' },
+  { key: 'tone', label: 'Tone & Style' }
 ]
 
 function scoreColor(score: number): string {
@@ -29,14 +30,20 @@ function scoreBarColor(score: number): string {
   return 'from-red-500 to-red-400'
 }
 
-export function ScorePanel({ score, weights, categoryScores, onWeightChange, customRules, onCustomRules, disabled }: Props) {
+export function ScorePanel({
+  score,
+  weights,
+  categoryScores,
+  onWeightChange,
+  customRules,
+  onCustomRules,
+  disabled
+}: Props): JSX.Element {
   return (
     <div className="p-4 space-y-4 border-b border-gray-800">
       {/* Score display */}
       <div className="flex items-center gap-4">
-        <div className={`text-4xl font-bold tabular-nums ${scoreColor(score)}`}>
-          {score}
-        </div>
+        <div className={`text-4xl font-bold tabular-nums ${scoreColor(score)}`}>{score}</div>
         <div className="text-gray-500 text-lg">/100</div>
         <div className="flex-1 bg-gray-700 rounded-full h-2.5 overflow-hidden">
           <div
@@ -56,13 +63,17 @@ export function ScorePanel({ score, weights, categoryScores, onWeightChange, cus
               min={0}
               max={100}
               value={weights[key]}
-              onChange={e => onWeightChange(key, Number(e.target.value))}
+              onChange={(e) => onWeightChange(key, Number(e.target.value))}
               disabled={disabled}
               className="flex-1 h-1.5 accent-blue-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
             />
-            <span className="w-8 text-xs text-right text-gray-400 tabular-nums">{weights[key]}%</span>
+            <span className="w-8 text-xs text-right text-gray-400 tabular-nums">
+              {weights[key]}%
+            </span>
             {categoryScores[key] !== undefined && (
-              <span className={`w-8 text-xs text-right tabular-nums font-medium ${scoreColor(categoryScores[key]!)}`}>
+              <span
+                className={`w-8 text-xs text-right tabular-nums font-medium ${scoreColor(categoryScores[key]!)}`}
+              >
                 {categoryScores[key]}
               </span>
             )}
@@ -72,12 +83,10 @@ export function ScorePanel({ score, weights, categoryScores, onWeightChange, cus
 
       {/* Custom rules */}
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1">
-          Custom Rules
-        </label>
+        <label className="block text-xs font-medium text-gray-400 mb-1">Custom Rules</label>
         <textarea
           value={customRules}
-          onChange={e => onCustomRules(e.target.value)}
+          onChange={(e) => onCustomRules(e.target.value)}
           placeholder="e.g. Never translate our brand name 'Acme'. Use formal pronouns."
           disabled={disabled}
           rows={2}

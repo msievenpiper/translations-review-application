@@ -1,53 +1,56 @@
-import { useState, useEffect } from 'react'
+import { type JSX, useState, useEffect } from 'react'
 
 interface ProviderConfig {
-  id:     string
-  label:  string
+  id: string
+  label: string
   models: string[]
 }
 
 const PROVIDERS: ProviderConfig[] = [
   {
-    id:     'claude',
-    label:  'Anthropic Claude',
-    models: ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5-20251001'],
+    id: 'claude',
+    label: 'Anthropic Claude',
+    models: ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5-20251001']
   },
   {
-    id:     'openai',
-    label:  'OpenAI',
-    models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
-  },
+    id: 'openai',
+    label: 'OpenAI',
+    models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo']
+  }
 ]
 
-export function SettingsPage() {
-  const [provider, setProvider] = useState<string>('claude')
-  const [model, setModel]       = useState<string>('claude-sonnet-4-6')
-  const [apiKey, setApiKey]     = useState<string>('')
-  const [saved, setSaved]       = useState(false)
-  const [loading, setLoading]   = useState(true)
+export function SettingsPage(): JSX.Element {
+  const [provider, setProvider] = useState<'claude' | 'openai'>('claude')
+  const [model, setModel] = useState<string>('claude-sonnet-4-6')
+  const [apiKey, setApiKey] = useState<string>('')
+  const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    window.api.settings.load().then((s: any) => {
-      if (s.provider) setProvider(s.provider)
-      if (s.model)    setModel(s.model)
-      if (s.apiKey)   setApiKey(s.apiKey)
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    window.api.settings
+      .load()
+      .then((s) => {
+        if (s.provider) setProvider(s.provider)
+        if (s.model) setModel(s.model)
+        if (s.apiKey) setApiKey(s.apiKey)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
-  function handleProviderChange(newProvider: string) {
-    setProvider(newProvider)
-    const config = PROVIDERS.find(p => p.id === newProvider)
+  function handleProviderChange(newProvider: string): void {
+    setProvider(newProvider as 'claude' | 'openai')
+    const config = PROVIDERS.find((p) => p.id === newProvider)
     if (config) setModel(config.models[0])
   }
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     await window.api.settings.save({ provider, model, apiKey })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
 
-  const models = PROVIDERS.find(p => p.id === provider)?.models ?? []
+  const models = PROVIDERS.find((p) => p.id === provider)?.models ?? []
 
   if (loading) {
     return <div className="p-8 text-gray-400 text-sm">Loading settings…</div>
@@ -60,11 +63,9 @@ export function SettingsPage() {
       <div className="space-y-6">
         {/* AI Provider */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1.5">
-            AI Provider
-          </label>
+          <label className="block text-sm font-medium text-gray-400 mb-1.5">AI Provider</label>
           <div className="flex gap-2">
-            {PROVIDERS.map(p => (
+            {PROVIDERS.map((p) => (
               <button
                 key={p.id}
                 onClick={() => handleProviderChange(p.id)}
@@ -82,34 +83,32 @@ export function SettingsPage() {
 
         {/* Model */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1.5">
-            Model
-          </label>
+          <label className="block text-sm font-medium text-gray-400 mb-1.5">Model</label>
           <select
             value={model}
-            onChange={e => setModel(e.target.value)}
+            onChange={(e) => setModel(e.target.value)}
             className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-blue-500"
           >
-            {models.map(m => (
-              <option key={m} value={m}>{m}</option>
+            {models.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
           </select>
         </div>
 
         {/* API Key */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1.5">
-            API Key
-          </label>
+          <label className="block text-sm font-medium text-gray-400 mb-1.5">API Key</label>
           <input
             type="password"
             value={apiKey}
-            onChange={e => setApiKey(e.target.value)}
-            placeholder={`Enter your ${PROVIDERS.find(p => p.id === provider)?.label ?? ''} API key`}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder={`Enter your ${PROVIDERS.find((p) => p.id === provider)?.label ?? ''} API key`}
             className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm font-mono text-gray-100 focus:outline-none focus:border-blue-500"
           />
           <p className="text-xs text-gray-500 mt-1.5">
-            Stored securely using OS-level encryption via Electron's safeStorage API.
+            Stored securely using OS-level encryption via Electron&apos;s safeStorage API.
           </p>
         </div>
 
