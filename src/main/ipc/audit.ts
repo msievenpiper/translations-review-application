@@ -99,11 +99,36 @@ export function registerAuditHandlers(): void {
 
   ipcMain.handle('audit:history', (_event, projectId: string) => {
     return getDb()
-      .prepare('SELECT * FROM audits WHERE project_id = ? ORDER BY created_at DESC')
+      .prepare(`
+        SELECT id, project_id, input_type, input_ref, ai_results, final_score, rubric_weights, created_at
+        FROM audits
+        WHERE project_id = ?
+        ORDER BY created_at DESC
+      `)
       .all(projectId)
   })
 
   ipcMain.handle('audit:delete', (_event, auditId: string) => {
     getDb().prepare('DELETE FROM audits WHERE id = ?').run(auditId)
+  })
+
+  ipcMain.handle('audit:get', (_event, auditId: string) => {
+    const row = getDb().prepare('SELECT * FROM audits WHERE id = ?').get(auditId)
+    if (!row) throw new Error(`Audit not found: ${auditId}`)
+    return row
+  })
+
+  ipcMain.handle('audit:snapshot', async (_event, auditId: string) => {
+    const row = getDb().prepare('SELECT html_snapshot FROM audits WHERE id = ?').get(auditId) as any
+    if (!row) throw new Error(`Audit not found: ${auditId}`)
+    if (!row.html_snapshot) return null
+
+    const { app } = await import('electron')
+    const { join } = await import('path')
+    const { writeFileSync } = await import('fs')
+
+    const tempPath = join(app.getPath('temp'), 'audit-preview.html')
+    writeFileSync(tempPath, row.html_snapshot, 'utf-8')
+    return `file://${tempPath}`
   })
 }

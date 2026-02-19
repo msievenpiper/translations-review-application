@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { writeFileSync, readFileSync, existsSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 import Database from 'better-sqlite3'
 import { applySchema } from '../../../src/main/db/schema'
 
@@ -24,5 +27,15 @@ describe('audits table snapshot columns', () => {
     const row = db.prepare('SELECT html_snapshot, rubric_weights FROM audits WHERE id = ?').get('a1') as any
     expect(row.html_snapshot).toBe('<html>test</html>')
     expect(row.rubric_weights).toBe('{"accuracy":{"weight":40}}')
+  })
+})
+
+describe('snapshot temp file', () => {
+  it('can write and read HTML from a temp file', () => {
+    const html = '<html><body>Hello world</body></html>'
+    const tempPath = join(tmpdir(), 'test-audit-preview.html')
+    writeFileSync(tempPath, html, 'utf-8')
+    expect(existsSync(tempPath)).toBe(true)
+    expect(readFileSync(tempPath, 'utf-8')).toBe(html)
   })
 })
