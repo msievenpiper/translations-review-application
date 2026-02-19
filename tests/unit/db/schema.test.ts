@@ -55,4 +55,8 @@ describe('database schema', () => {
     expect(row.html_snapshot).toBe('')
     expect(row.rubric_weights).toBe('{}')
   })
+
+  it('applySchema is idempotent — calling twice does not throw', () => {
+    expect(() => applySchema(db)).not.toThrow()
+  })
 })
