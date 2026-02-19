@@ -20,5 +20,20 @@ contextBridge.exposeInMainWorld('api', {
   },
   export: {
     report: (auditId: string) => ipcRenderer.invoke('export:report', auditId)
+  },
+  schedule: {
+    get: (projectId: string) => ipcRenderer.invoke('schedule:get', projectId),
+    upsert: (projectId: string, config: unknown) =>
+      ipcRenderer.invoke('schedule:upsert', projectId, config),
+    delete: (projectId: string) => ipcRenderer.invoke('schedule:delete', projectId),
+    trackedUrls: {
+      list: (projectId: string) => ipcRenderer.invoke('schedule:trackedUrls:list', projectId),
+      add: (projectId: string, url: string, opts?: unknown) =>
+        ipcRenderer.invoke('schedule:trackedUrls:add', projectId, url, opts),
+      toggle: (urlId: string, enabled: boolean) =>
+        ipcRenderer.invoke('schedule:trackedUrls:toggle', urlId, enabled),
+      delete: (urlId: string) => ipcRenderer.invoke('schedule:trackedUrls:delete', urlId)
+    },
+    runNow: (projectId: string) => ipcRenderer.invoke('schedule:runNow', projectId)
   }
 })

@@ -31,6 +31,30 @@ declare global {
     final_score: number
     html_snapshot: string
     rubric_weights: string
+    schedule_run_id: string | null
+    created_at: number
+  }
+
+  interface ScheduleDbRow {
+    id: string
+    project_id: string
+    enabled: number
+    frequency: 'daily' | 'weekly' | 'monthly'
+    day_of_week: number | null
+    day_of_month: number | null
+    time_of_day: string
+    last_run_at: number | null
+    next_run_at: number
+    created_at: number
+  }
+
+  interface TrackedUrlDbRow {
+    id: string
+    project_id: string
+    url: string
+    user_agent: string | null
+    accept_language: string | null
+    enabled: number
     created_at: number
   }
 
@@ -57,8 +81,21 @@ declare global {
   }
 
   type AuditRequest =
-    | { type: 'url'; projectId: string; url: string; userAgent?: string; acceptLanguage?: string; targetLocale?: string }
-    | { type: 'file'; projectId: string; filePath: string; fileType: 'html' | 'json' | 'csv'; targetLocale?: string }
+    | {
+        type: 'url'
+        projectId: string
+        url: string
+        userAgent?: string
+        acceptLanguage?: string
+        targetLocale?: string
+      }
+    | {
+        type: 'file'
+        projectId: string
+        filePath: string
+        fileType: 'html' | 'json' | 'csv'
+        targetLocale?: string
+      }
 
   interface Window {
     api: {
@@ -81,6 +118,22 @@ declare global {
       }
       export: {
         report: (auditId: string) => Promise<string>
+      }
+      schedule: {
+        get: (projectId: string) => Promise<ScheduleDbRow | null>
+        upsert: (projectId: string, config: Partial<ScheduleDbRow>) => Promise<ScheduleDbRow>
+        delete: (projectId: string) => Promise<void>
+        trackedUrls: {
+          list: (projectId: string) => Promise<TrackedUrlDbRow[]>
+          add: (
+            projectId: string,
+            url: string,
+            opts?: { userAgent?: string; acceptLanguage?: string }
+          ) => Promise<TrackedUrlDbRow>
+          toggle: (urlId: string, enabled: boolean) => Promise<void>
+          delete: (urlId: string) => Promise<void>
+        }
+        runNow: (projectId: string) => Promise<void>
       }
     }
   }

@@ -2,11 +2,13 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { initDb } from './db/index'
-import { registerAuditHandlers }    from './ipc/audit'
-import { registerProjectHandlers }  from './ipc/projects'
+import { initDb, getDb } from './db/index'
+import { registerAuditHandlers } from './ipc/audit'
+import { registerProjectHandlers } from './ipc/projects'
 import { registerSettingsHandlers } from './ipc/settings'
-import { registerExportHandlers }   from './ipc/export'
+import { registerExportHandlers } from './ipc/export'
+import { registerScheduleHandlers } from './ipc/schedules'
+import { Scheduler } from './scheduler'
 
 function createWindow(): void {
   // Create the browser window.
@@ -62,11 +64,17 @@ app.whenReady().then(() => {
   // Initialize database with persistent path
   initDb(join(app.getPath('userData'), 'auditor.db'))
 
+  // Start scheduler
+  const scheduler = new Scheduler(getDb())
+  scheduler.start()
+  app.on('before-quit', () => scheduler.stop())
+
   // Register IPC handlers
   registerAuditHandlers()
   registerProjectHandlers()
   registerSettingsHandlers()
   registerExportHandlers()
+  registerScheduleHandlers(getDb(), scheduler)
 
   createWindow()
 
