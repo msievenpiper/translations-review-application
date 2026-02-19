@@ -99,8 +99,7 @@ const TARGET_LANG_PRESETS: TargetLangPreset[] = [
   { label: 'Project default', locale: undefined },
   ...LANG_PRESETS.filter(
     (p) => p.acceptLanguage && p.acceptLanguage !== 'custom'
-  ).map((p) => ({ label: p.label, locale: p.acceptLanguage!.split(',')[0] })),
-  { label: 'Custom…', locale: 'custom' }
+  ).map((p) => ({ label: p.label, locale: p.acceptLanguage!.split(',')[0] }))
 ]
 
 interface Props {
@@ -123,19 +122,29 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
   const [customUa, setCustomUa] = useState('')
   const [langPresetIndex, setLangPresetIndex] = useState(0)
   const [customLang, setCustomLang] = useState('')
-  const [targetLangIndex, setTargetLangIndex] = useState(0)
-  const [customTargetLocale, setCustomTargetLocale] = useState('')
+  const [targetLocaleInput, setTargetLocaleInput] = useState('')
+  const [showTargetSuggestions, setShowTargetSuggestions] = useState(false)
+  const [targetActiveIndex, setTargetActiveIndex] = useState(-1)
 
   const selectedUa = UA_PRESETS[uaPresetIndex]
   const selectedLang = LANG_PRESETS[langPresetIndex]
   const isCustomUa = selectedUa.userAgent === 'custom'
   const isCustomLang = selectedLang.acceptLanguage === 'custom'
 
-  const selectedTargetLang = TARGET_LANG_PRESETS[targetLangIndex]
-  const isCustomTargetLang = selectedTargetLang.locale === 'custom'
-  const effectiveTargetLocale = isCustomTargetLang
-    ? customTargetLocale.trim() || undefined
-    : selectedTargetLang.locale
+  const filteredTargetPresets = TARGET_LANG_PRESETS.filter(
+    (p) =>
+      targetLocaleInput === '' ||
+      p.label.toLowerCase().includes(targetLocaleInput.toLowerCase()) ||
+      (p.locale && p.locale.toLowerCase().includes(targetLocaleInput.toLowerCase()))
+  )
+
+  const matchedTargetPreset = TARGET_LANG_PRESETS.find((p) => p.label === targetLocaleInput)
+  const effectiveTargetLocale =
+    targetLocaleInput === ''
+      ? undefined
+      : matchedTargetPreset !== undefined
+        ? matchedTargetPreset.locale
+        : targetLocaleInput.trim() || undefined
 
   const canRun = !running && (mode === 'url' ? url.trim().length > 0 : filePath.length > 0)
 
@@ -180,6 +189,32 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
       }
     }
     input.click()
+  }
+
+  function handleTargetLocaleKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
+    if (!showTargetSuggestions) {
+      if (e.key === 'ArrowDown') {
+        setShowTargetSuggestions(true)
+        setTargetActiveIndex(0)
+      }
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setTargetActiveIndex((i) => Math.min(i + 1, filteredTargetPresets.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setTargetActiveIndex((i) => Math.max(i - 1, -1))
+    } else if (e.key === 'Enter' && targetActiveIndex >= 0) {
+      e.preventDefault()
+      const p = filteredTargetPresets[targetActiveIndex]
+      setTargetLocaleInput(p.locale === undefined ? '' : p.label)
+      setShowTargetSuggestions(false)
+      setTargetActiveIndex(-1)
+    } else if (e.key === 'Escape') {
+      setShowTargetSuggestions(false)
+      setTargetActiveIndex(-1)
+    }
   }
 
   const errorInfo = error ? getErrorInfo(error) : null
@@ -306,27 +341,51 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
       {/* Target Language */}
       <div className="flex items-center gap-2">
         <label className="text-xs text-gray-400 shrink-0">Target Language</label>
-        <select
-          value={targetLangIndex}
-          onChange={(e) => setTargetLangIndex(Number(e.target.value))}
-          className="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-xs text-gray-100"
-        >
-          {TARGET_LANG_PRESETS.map((p, i) => (
-            <option key={i} value={i}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={targetLocaleInput}
+            onChange={(e) => {
+              setTargetLocaleInput(e.target.value)
+              setShowTargetSuggestions(true)
+              setTargetActiveIndex(-1)
+            }}
+            onFocus={() => setShowTargetSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowTargetSuggestions(false), 150)}
+            onKeyDown={handleTargetLocaleKeyDown}
+            placeholder="Project default"
+            className="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500"
+          />
+          {showTargetSuggestions && filteredTargetPresets.length > 0 && (
+            <ul className="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded shadow-lg max-h-48 overflow-y-auto">
+              {filteredTargetPresets.map((p, i) => (
+                <li
+                  key={i}
+                  onMouseDown={() => {
+                    setTargetLocaleInput(p.locale === undefined ? '' : p.label)
+                    setShowTargetSuggestions(false)
+                    setTargetActiveIndex(-1)
+                  }}
+                  className={`flex items-center justify-between px-2 py-1.5 text-xs cursor-pointer ${
+                    i === targetActiveIndex
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-100 hover:bg-gray-700'
+                  }`}
+                >
+                  <span>{p.label}</span>
+                  {p.locale && (
+                    <span
+                      className={`ml-2 ${i === targetActiveIndex ? 'text-blue-200' : 'text-gray-500'}`}
+                    >
+                      {p.locale}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-      {isCustomTargetLang && (
-        <input
-          type="text"
-          value={customTargetLocale}
-          onChange={(e) => setCustomTargetLocale(e.target.value)}
-          placeholder="e.g. zh-TW, fr-CH"
-          className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500"
-        />
-      )}
 
       {/* Error */}
       {errorInfo && (
