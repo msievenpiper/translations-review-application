@@ -50,15 +50,15 @@ export function HistoryPage() {
   }
 
   const filtered = audits.filter(a => {
-    if (search && !a.input_ref.toLowerCase().includes(search.toLowerCase())) return false
+    if (search && !(a.input_ref ?? '').toLowerCase().includes(search.toLowerCase())) return false
     if (minScore !== '' && (a.final_score ?? 0) < Number(minScore)) return false
     if (maxScore !== '' && (a.final_score ?? 0) > Number(maxScore)) return false
     if (fromDate) {
-      const from = new Date(fromDate).getTime() / 1000
+      const from = new Date(fromDate + 'T00:00:00').getTime() / 1000
       if (a.created_at < from) return false
     }
     if (toDate) {
-      const to = new Date(toDate).getTime() / 1000 + 86399 // end of day
+      const to = new Date(toDate + 'T00:00:00').getTime() / 1000 + 86399 // end of day
       if (a.created_at > to) return false
     }
     return true
