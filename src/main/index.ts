@@ -6,6 +6,7 @@ import { initDb } from './db/index'
 import { registerAuditHandlers }    from './ipc/audit'
 import { registerProjectHandlers }  from './ipc/projects'
 import { registerSettingsHandlers } from './ipc/settings'
+import { registerExportHandlers }   from './ipc/export'
 
 function createWindow(): void {
   // Create the browser window.
@@ -63,6 +64,7 @@ app.whenReady().then(() => {
   registerAuditHandlers()
   registerProjectHandlers()
   registerSettingsHandlers()
+  registerExportHandlers()
 
   createWindow()
 
