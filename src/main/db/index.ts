@@ -1,5 +1,4 @@
 import Database from 'better-sqlite3'
-import path from 'path'
 import { applySchema } from './schema'
 
 let _db: Database.Database | null = null
