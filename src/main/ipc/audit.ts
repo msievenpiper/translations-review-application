@@ -38,6 +38,9 @@ export function registerAuditHandlers(): void {
 
     if (req.type === 'url') {
       const fetched = await fetchPageHtml(req.url)
+      if (!fetched.html?.trim()) {
+        throw new Error(`Fetched page returned empty HTML for URL: ${req.url}`)
+      }
       htmlSnapshot = fetched.html
       const extracted = extractTextFromHtml(fetched.html)
       targetText = extracted.allText
