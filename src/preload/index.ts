@@ -8,9 +8,11 @@ contextBridge.exposeInMainWorld('api', {
     delete: (id: string)            => ipcRenderer.invoke('projects:delete', id),
   },
   audit: {
-    run:     (req: any)             => ipcRenderer.invoke('audit:run', req),
-    history: (projectId: string)    => ipcRenderer.invoke('audit:history', projectId),
-    delete:  (auditId: string)      => ipcRenderer.invoke('audit:delete', auditId),
+    run:      (req: any)          => ipcRenderer.invoke('audit:run', req),
+    get:      (auditId: string)   => ipcRenderer.invoke('audit:get', auditId),
+    history:  (projectId: string) => ipcRenderer.invoke('audit:history', projectId),
+    delete:   (auditId: string)   => ipcRenderer.invoke('audit:delete', auditId),
+    snapshot: (auditId: string)   => ipcRenderer.invoke('audit:snapshot', auditId),
   },
   settings: {
     load: ()          => ipcRenderer.invoke('settings:load'),

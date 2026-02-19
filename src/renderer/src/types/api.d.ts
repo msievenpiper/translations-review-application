@@ -8,9 +8,11 @@ declare global {
         delete: (id: string)            => Promise<void>
       }
       audit: {
-        run:     (req: any)          => Promise<any>
-        history: (projectId: string) => Promise<any[]>
-        delete:  (auditId: string)   => Promise<void>
+        run:      (req: any)          => Promise<any>
+        get:      (auditId: string)   => Promise<any>
+        history:  (projectId: string) => Promise<any[]>
+        delete:   (auditId: string)   => Promise<void>
+        snapshot: (auditId: string)   => Promise<string | null>
       }
       settings: {
         load: ()          => Promise<any>
