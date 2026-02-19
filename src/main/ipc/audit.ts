@@ -36,7 +36,10 @@ export function registerAuditHandlers(): void {
     let inputRef = ''
 
     if (req.type === 'url') {
-      const fetched = await fetchPageHtml(req.url)
+      const fetched = await fetchPageHtml(req.url, {
+        userAgent:      req.userAgent,
+        acceptLanguage: req.acceptLanguage,
+      })
       const extracted = extractTextFromHtml(fetched.html)
       targetText = extracted.allText
       sourceText = targetText

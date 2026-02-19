@@ -12,5 +12,11 @@ export interface Project {
 }
 
 export type AuditRequest =
-  | { type: 'url';  projectId: string; url: string }
+  | {
+      type:            'url'
+      projectId:       string
+      url:             string
+      userAgent?:      string
+      acceptLanguage?: string
+    }
   | { type: 'file'; projectId: string; filePath: string; fileType: 'html' | 'json' | 'csv' }
