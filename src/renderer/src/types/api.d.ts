@@ -57,8 +57,8 @@ declare global {
   }
 
   type AuditRequest =
-    | { type: 'url'; projectId: string; url: string; userAgent?: string; acceptLanguage?: string }
-    | { type: 'file'; projectId: string; filePath: string; fileType: 'html' | 'json' | 'csv' }
+    | { type: 'url'; projectId: string; url: string; userAgent?: string; acceptLanguage?: string; targetLocale?: string }
+    | { type: 'file'; projectId: string; filePath: string; fileType: 'html' | 'json' | 'csv'; targetLocale?: string }
 
   interface Window {
     api: {

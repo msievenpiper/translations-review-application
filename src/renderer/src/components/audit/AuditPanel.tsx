@@ -15,6 +15,11 @@ interface LangPreset {
   acceptLanguage: string | undefined
 }
 
+interface TargetLangPreset {
+  label: string
+  locale: string | undefined
+}
+
 const UA_PRESETS: UaPreset[] = [
   { label: 'Desktop (default)', userAgent: undefined },
   {
@@ -90,6 +95,14 @@ const LANG_PRESETS: LangPreset[] = [
   { label: 'Custom…', acceptLanguage: 'custom' }
 ]
 
+const TARGET_LANG_PRESETS: TargetLangPreset[] = [
+  { label: 'Project default', locale: undefined },
+  ...LANG_PRESETS.filter(
+    (p) => p.acceptLanguage && p.acceptLanguage !== 'custom'
+  ).map((p) => ({ label: p.label, locale: p.acceptLanguage!.split(',')[0] })),
+  { label: 'Custom…', locale: 'custom' }
+]
+
 interface Props {
   projectId: string
   onResult: (result: AuditRunResult) => void
@@ -110,11 +123,19 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
   const [customUa, setCustomUa] = useState('')
   const [langPresetIndex, setLangPresetIndex] = useState(0)
   const [customLang, setCustomLang] = useState('')
+  const [targetLangIndex, setTargetLangIndex] = useState(0)
+  const [customTargetLocale, setCustomTargetLocale] = useState('')
 
   const selectedUa = UA_PRESETS[uaPresetIndex]
   const selectedLang = LANG_PRESETS[langPresetIndex]
   const isCustomUa = selectedUa.userAgent === 'custom'
   const isCustomLang = selectedLang.acceptLanguage === 'custom'
+
+  const selectedTargetLang = TARGET_LANG_PRESETS[targetLangIndex]
+  const isCustomTargetLang = selectedTargetLang.locale === 'custom'
+  const effectiveTargetLocale = isCustomTargetLang
+    ? customTargetLocale.trim() || undefined
+    : selectedTargetLang.locale
 
   const canRun = !running && (mode === 'url' ? url.trim().length > 0 : filePath.length > 0)
 
@@ -129,9 +150,9 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
         const acceptLanguage = isCustomLang
           ? customLang.trim() || undefined
           : selectedLang.acceptLanguage
-        req = { type: 'url' as const, projectId, url: url.trim(), userAgent, acceptLanguage }
+        req = { type: 'url' as const, projectId, url: url.trim(), userAgent, acceptLanguage, targetLocale: effectiveTargetLocale }
       } else {
-        req = { type: 'file' as const, projectId, filePath, fileType }
+        req = { type: 'file' as const, projectId, filePath, fileType, targetLocale: effectiveTargetLocale }
       }
 
       const result = await window.api.audit.run(req)
@@ -280,6 +301,31 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
             Browse
           </button>
         </div>
+      )}
+
+      {/* Target Language */}
+      <div className="flex items-center gap-2">
+        <label className="text-xs text-gray-400 shrink-0">Target Language</label>
+        <select
+          value={targetLangIndex}
+          onChange={(e) => setTargetLangIndex(Number(e.target.value))}
+          className="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-xs text-gray-100"
+        >
+          {TARGET_LANG_PRESETS.map((p, i) => (
+            <option key={i} value={i}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      {isCustomTargetLang && (
+        <input
+          type="text"
+          value={customTargetLocale}
+          onChange={(e) => setCustomTargetLocale(e.target.value)}
+          placeholder="e.g. zh-TW, fr-CH"
+          className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:border-blue-500"
+        />
       )}
 
       {/* Error */}

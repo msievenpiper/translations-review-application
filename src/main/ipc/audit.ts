@@ -46,7 +46,8 @@ export function registerAuditHandlers(): void {
 
     const rubric = JSON.parse(project.rubric_config)
     const targetLocales: string[] = JSON.parse(project.target_locales)
-    const targetLocale = targetLocales[0] ?? 'unknown'
+    const projectTargetLocale = targetLocales[0] ?? 'unknown'
+    const targetLocale = req.targetLocale ?? projectTargetLocale
 
     let targetText = ''
     let sourceText = ''
