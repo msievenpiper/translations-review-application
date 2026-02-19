@@ -23,6 +23,7 @@
     "build:linux": "electron-vite build && electron-builder --linux",
     "pretest": "npm rebuild better-sqlite3",
     "test": "vitest run",
+    "posttest": "npm run postinstall",
     "test:watch": "vitest",
     "pretest:e2e": "npm run postinstall",
     "test:e2e": "playwright test"
