@@ -19,8 +19,10 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
+    "pretest": "npm rebuild better-sqlite3",
     "test": "vitest run",
     "test:watch": "vitest",
+    "pretest:e2e": "npm run postinstall",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -28,10 +30,12 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "better-sqlite3": "^12.6.2",
+    "cheerio": "^1.2.0",
     "electron-store": "^8.2.0",
     "openai": "^6.22.0",
     "papaparse": "^5.5.3",
-    "puppeteer": "^24.37.4"
+    "puppeteer": "^24.37.4",
+    "react-router-dom": "^7.13.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
@@ -45,6 +49,7 @@
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.24",
