@@ -12,7 +12,7 @@ const {
   mockTitle,
   mockClose,
   mockPage,
-  mockBrowser,
+  mockBrowser
 } = vi.hoisted(() => {
   const mockSetUserAgent = vi.fn()
   const mockSetExtraHTTPHeaders = vi.fn()
@@ -30,12 +30,12 @@ const {
     goto: mockGoto,
     content: mockContent,
     url: mockUrl,
-    title: mockTitle,
+    title: mockTitle
   }
 
   const mockBrowser = {
     newPage: vi.fn().mockResolvedValue(mockPage),
-    close: mockClose,
+    close: mockClose
   }
 
   return {
@@ -48,14 +48,14 @@ const {
     mockTitle,
     mockClose,
     mockPage,
-    mockBrowser,
+    mockBrowser
   }
 })
 
 vi.mock('puppeteer', () => ({
   default: {
-    launch: vi.fn().mockResolvedValue(mockBrowser),
-  },
+    launch: vi.fn().mockResolvedValue(mockBrowser)
+  }
 }))
 
 import { fetchPageHtml } from '../../../src/main/extractor/url'
@@ -99,19 +99,22 @@ describe('fetchPageHtml', () => {
   })
 
   it('sets viewport to 390x844 for iPhone UA', async () => {
-    const ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+    const ua =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
     await fetchPageHtml('https://example.com/', { userAgent: ua })
     expect(mockSetViewport).toHaveBeenCalledWith({ width: 390, height: 844 })
   })
 
   it('sets viewport to 1024x1366 for iPad UA', async () => {
-    const ua = 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+    const ua =
+      'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
     await fetchPageHtml('https://example.com/', { userAgent: ua })
     expect(mockSetViewport).toHaveBeenCalledWith({ width: 1024, height: 1366 })
   })
 
   it('sets viewport to 412x915 for Android UA', async () => {
-    const ua = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+    const ua =
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
     await fetchPageHtml('https://example.com/', { userAgent: ua })
     expect(mockSetViewport).toHaveBeenCalledWith({ width: 412, height: 915 })
   })

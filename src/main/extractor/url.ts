@@ -1,23 +1,23 @@
 import puppeteer from 'puppeteer'
 
 export interface FetchResult {
-  html:     string
-  mhtml:    string
+  html: string
+  mhtml: string
   finalUrl: string
-  title:    string
+  title: string
 }
 
 export interface FetchOptions {
-  userAgent?:      string
+  userAgent?: string
   acceptLanguage?: string
 }
 
 // Viewport dimensions keyed by a substring present in the UA string.
 // Checked in order; first match wins. Falls back to desktop.
 const UA_VIEWPORTS: Array<{ match: string; width: number; height: number }> = [
-  { match: 'iPad',    width: 1024, height: 1366 },
-  { match: 'iPhone',  width: 390,  height: 844  },
-  { match: 'Android', width: 412,  height: 915  },
+  { match: 'iPad', width: 1024, height: 1366 },
+  { match: 'iPhone', width: 390, height: 844 },
+  { match: 'Android', width: 412, height: 915 }
 ]
 
 function viewportForUA(ua: string): { width: number; height: number } {
@@ -27,13 +27,10 @@ function viewportForUA(ua: string): { width: number; height: number } {
   return { width: 1280, height: 900 }
 }
 
-export async function fetchPageHtml(
-  url: string,
-  opts: FetchOptions = {},
-): Promise<FetchResult> {
+export async function fetchPageHtml(url: string, opts: FetchOptions = {}): Promise<FetchResult> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   })
 
   try {
@@ -52,19 +49,19 @@ export async function fetchPageHtml(
 
     const response = await page.goto(url, {
       waitUntil: 'networkidle2',
-      timeout: 30_000,
+      timeout: 30_000
     })
 
     if (!response || response.status() >= 400) {
       throw new Error(`Failed to fetch page: HTTP ${response?.status() ?? 'unknown'}`)
     }
 
-    const html     = await page.content()
-    const client   = await page.createCDPSession()
+    const html = await page.content()
+    const client = await page.createCDPSession()
     const { data: mhtml } = await client.send('Page.captureSnapshot', { format: 'mhtml' })
     await client.detach()
     const finalUrl = page.url()
-    const title    = await page.title()
+    const title = await page.title()
 
     return { html, mhtml, finalUrl, title }
   } finally {

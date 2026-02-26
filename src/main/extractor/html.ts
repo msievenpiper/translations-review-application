@@ -2,10 +2,10 @@ import * as cheerio from 'cheerio'
 
 export interface ExtractedText {
   navigation: string[]
-  headings:   string[]
-  body:       string[]
+  headings: string[]
+  body: string[]
   ctaButtons: string[]
-  allText:    string
+  allText: string
 }
 
 export function extractTextFromHtml(html: string): ExtractedText {
@@ -15,8 +15,8 @@ export function extractTextFromHtml(html: string): ExtractedText {
   $('script, style, noscript, svg, img').remove()
 
   const navigation: string[] = []
-  const headings:   string[] = []
-  const body:       string[] = []
+  const headings: string[] = []
+  const body: string[] = []
   const ctaButtons: string[] = []
 
   $('nav a, header a').each((_, el) => {

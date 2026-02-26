@@ -1,14 +1,14 @@
 export interface AnnotationIssue {
-  id:       number
-  text:     string
+  id: number
+  text: string
   category: string
   severity: 'low' | 'medium' | 'high'
 }
 
 const SEVERITY_COLORS: Record<AnnotationIssue['severity'], string> = {
-  low:    '#fbbf24',
+  low: '#fbbf24',
   medium: '#f97316',
-  high:   '#ef4444',
+  high: '#ef4444'
 }
 
 /**
@@ -21,9 +21,9 @@ const SEVERITY_COLORS: Record<AnnotationIssue['severity'], string> = {
  */
 export function buildAnnotationScript(issues: AnnotationIssue[]): string {
   // JSON.stringify handles all necessary JS string escaping (backslashes, quotes, etc.)
-  const serializedIssues = issues.map(i => ({
+  const serializedIssues = issues.map((i) => ({
     ...i,
-    color: SEVERITY_COLORS[i.severity],
+    color: SEVERITY_COLORS[i.severity]
   }))
 
   return `

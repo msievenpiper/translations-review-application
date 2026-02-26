@@ -97,9 +97,10 @@ const LANG_PRESETS: LangPreset[] = [
 
 const TARGET_LANG_PRESETS: TargetLangPreset[] = [
   { label: 'Project default', locale: undefined },
-  ...LANG_PRESETS.filter(
-    (p) => p.acceptLanguage && p.acceptLanguage !== 'custom'
-  ).map((p) => ({ label: p.label, locale: p.acceptLanguage!.split(',')[0] }))
+  ...LANG_PRESETS.filter((p) => p.acceptLanguage && p.acceptLanguage !== 'custom').map((p) => ({
+    label: p.label,
+    locale: p.acceptLanguage!.split(',')[0]
+  }))
 ]
 
 interface Props {
@@ -159,9 +160,22 @@ export function AuditPanel({ projectId, onResult, onProgress, onAuditedUrl }: Pr
         const acceptLanguage = isCustomLang
           ? customLang.trim() || undefined
           : selectedLang.acceptLanguage
-        req = { type: 'url' as const, projectId, url: url.trim(), userAgent, acceptLanguage, targetLocale: effectiveTargetLocale }
+        req = {
+          type: 'url' as const,
+          projectId,
+          url: url.trim(),
+          userAgent,
+          acceptLanguage,
+          targetLocale: effectiveTargetLocale
+        }
       } else {
-        req = { type: 'file' as const, projectId, filePath, fileType, targetLocale: effectiveTargetLocale }
+        req = {
+          type: 'file' as const,
+          projectId,
+          filePath,
+          fileType,
+          targetLocale: effectiveTargetLocale
+        }
       }
 
       const result = await window.api.audit.run(req)

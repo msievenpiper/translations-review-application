@@ -9,7 +9,7 @@ describe('buildCategoryPrompt', () => {
       targetLocale: 'es-MX',
       sourceText: 'Log in',
       targetText: 'Entrar',
-      customRules: '',
+      customRules: ''
     })
     expect(prompt).toContain('en')
     expect(prompt).toContain('es-MX')
@@ -22,7 +22,7 @@ describe('buildCategoryPrompt', () => {
       targetLocale: 'de',
       sourceText: 'Hey there!',
       targetText: 'Hey!',
-      customRules: 'Always use formal Sie pronoun in German.',
+      customRules: 'Always use formal Sie pronoun in German.'
     })
     expect(prompt).toContain('formal Sie pronoun')
   })
@@ -34,7 +34,7 @@ describe('buildCategoryPrompt', () => {
       targetLocale: 'fr',
       sourceText: 'test',
       targetText: 'test',
-      customRules: '',
+      customRules: ''
     })
     expect(prompt).toContain('score')
     expect(prompt).toContain('issues')
@@ -51,7 +51,7 @@ describe('buildCategoryPrompt', () => {
       targetLocale: 'fr',
       sourceText: 'test',
       targetText: 'test',
-      customRules: '',
+      customRules: ''
     })
     expect(prompt).not.toContain('Custom rules')
   })

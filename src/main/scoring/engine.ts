@@ -4,21 +4,21 @@ import type { AiIssue, CategoryResult } from '../ai/index'
 import type { RubricConfig } from '../settings'
 
 export interface AuditInput {
-  sourceLocale:  string
-  targetLocale:  string
-  sourceText:    string
-  targetText:    string
-  customRules:   string
-  rubric:        RubricConfig
-  aiConfig:      { provider: 'claude' | 'openai'; apiKey: string; model: string }
-  onProgress?:   (category: string, done: number, total: number) => void
+  sourceLocale: string
+  targetLocale: string
+  sourceText: string
+  targetText: string
+  customRules: string
+  rubric: RubricConfig
+  aiConfig: { provider: 'claude' | 'openai'; apiKey: string; model: string }
+  onProgress?: (category: string, done: number, total: number) => void
 }
 
 export interface AuditResult {
   categoryResults: CategoryResult[]
-  categoryScores:  Record<string, number>
-  finalScore:      number
-  allIssues:       (AiIssue & { category: string })[]
+  categoryScores: Record<string, number>
+  finalScore: number
+  allIssues: (AiIssue & { category: string })[]
 }
 
 export function computeFinalScore(
@@ -48,9 +48,9 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
       category,
       sourceLocale: input.sourceLocale,
       targetLocale: input.targetLocale,
-      sourceText:   input.sourceText,
-      targetText:   input.targetText,
-      customRules:  input.customRules,
+      sourceText: input.sourceText,
+      targetText: input.targetText,
+      customRules: input.customRules
     })
 
     const result = await client.evaluate(prompt)
@@ -59,14 +59,12 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
 
   input.onProgress?.('done', total, total)
 
-  const categoryScores = Object.fromEntries(
-    categoryResults.map(r => [r.category, r.score])
-  )
+  const categoryScores = Object.fromEntries(categoryResults.map((r) => [r.category, r.score]))
 
   const finalScore = computeFinalScore(categoryScores, input.rubric)
 
-  const allIssues = categoryResults.flatMap(r =>
-    r.issues.map(issue => ({ ...issue, category: r.category }))
+  const allIssues = categoryResults.flatMap((r) =>
+    r.issues.map((issue) => ({ ...issue, category: r.category }))
   )
 
   return { categoryResults, categoryScores, finalScore, allIssues }

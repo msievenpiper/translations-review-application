@@ -26,7 +26,7 @@ test.describe('Translation Auditor App', () => {
 
     let apiCallCount = 0
     // Monitor network requests from the renderer
-    page.on('request', req => {
+    page.on('request', (req) => {
       const url = req.url()
       if (url.includes('anthropic.com') || url.includes('openai.com')) {
         apiCallCount++
@@ -65,7 +65,10 @@ test.describe('Translation Auditor App', () => {
     await page.waitForTimeout(300)
 
     // Settings page should show AI Provider config
-    const hasProvider = await page.locator('text=AI Provider').isVisible().catch(() => false)
+    const hasProvider = await page
+      .locator('text=AI Provider')
+      .isVisible()
+      .catch(() => false)
     expect(hasProvider).toBe(true)
 
     await app.close()

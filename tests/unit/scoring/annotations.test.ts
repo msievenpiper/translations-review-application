@@ -4,7 +4,7 @@ import { buildAnnotationScript, type AnnotationIssue } from '../../../src/main/s
 describe('buildAnnotationScript', () => {
   it('returns a string (self-contained JS)', () => {
     const issues: AnnotationIssue[] = [
-      { id: 1, text: 'Log in', category: 'accuracy', severity: 'medium' },
+      { id: 1, text: 'Log in', category: 'accuracy', severity: 'medium' }
     ]
     const script = buildAnnotationScript(issues)
     expect(typeof script).toBe('string')
@@ -13,7 +13,7 @@ describe('buildAnnotationScript', () => {
 
   it('embeds issue text in the script', () => {
     const issues: AnnotationIssue[] = [
-      { id: 1, text: 'Log in', category: 'accuracy', severity: 'medium' },
+      { id: 1, text: 'Log in', category: 'accuracy', severity: 'medium' }
     ]
     const script = buildAnnotationScript(issues)
     expect(script).toContain('Log in')
@@ -21,7 +21,7 @@ describe('buildAnnotationScript', () => {
 
   it('includes data-audit-id attribute in the script', () => {
     const issues: AnnotationIssue[] = [
-      { id: 1, text: 'Log in', category: 'accuracy', severity: 'medium' },
+      { id: 1, text: 'Log in', category: 'accuracy', severity: 'medium' }
     ]
     const script = buildAnnotationScript(issues)
     expect(script).toContain('data-audit-id')
@@ -29,7 +29,7 @@ describe('buildAnnotationScript', () => {
 
   it('escapes backslashes in text to avoid script injection', () => {
     const issues: AnnotationIssue[] = [
-      { id: 1, text: 'path\\to\\file', category: 'accuracy', severity: 'low' },
+      { id: 1, text: 'path\\to\\file', category: 'accuracy', severity: 'low' }
     ]
     const script = buildAnnotationScript(issues)
     // The raw backslash should be escaped in the JS output

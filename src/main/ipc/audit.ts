@@ -154,9 +154,11 @@ export function registerAuditHandlers(): void {
     const { join } = await import('path')
     const { writeFileSync } = await import('fs')
 
-    const isMhtml = row.html_snapshot.startsWith('MIME-Version:') ||
-                    row.html_snapshot.startsWith('From -')
-    const ext      = isMhtml ? 'mhtml' : 'html'
+    const isMhtml =
+      row.html_snapshot.startsWith('MIME-Version:') ||
+      row.html_snapshot.startsWith('From -') ||
+      row.html_snapshot.startsWith('From:')
+    const ext = isMhtml ? 'mhtml' : 'html'
     const tempPath = join(app.getPath('temp'), `audit-preview.${ext}`)
     writeFileSync(tempPath, row.html_snapshot, 'utf-8')
     return `file://${tempPath}`

@@ -1,8 +1,6 @@
 export type RubricCategory = 'accuracy' | 'fluency' | 'completeness' | 'tone'
 
-export const RUBRIC_CATEGORIES: RubricCategory[] = [
-  'accuracy', 'fluency', 'completeness', 'tone',
-]
+export const RUBRIC_CATEGORIES: RubricCategory[] = ['accuracy', 'fluency', 'completeness', 'tone']
 
 const CATEGORY_DESCRIPTIONS: Record<RubricCategory, string> = {
   accuracy:
@@ -11,17 +9,16 @@ const CATEGORY_DESCRIPTIONS: Record<RubricCategory, string> = {
     'Does the target text read naturally and grammatically in the target language? Flag unnatural phrasing, grammar errors, or awkward constructions.',
   completeness:
     'Are all source strings present in the target? Flag any untranslated strings, placeholder text left in the source language, or missing content.',
-  tone:
-    'Does the target text match the tone and style of the source (formality, voice, brand language)? Flag mismatches in register or style.',
+  tone: 'Does the target text match the tone and style of the source (formality, voice, brand language)? Flag mismatches in register or style.'
 }
 
 export interface PromptParams {
-  category:     RubricCategory
+  category: RubricCategory
   sourceLocale: string
   targetLocale: string
-  sourceText:   string
-  targetText:   string
-  customRules:  string
+  sourceText: string
+  targetText: string
+  customRules: string
 }
 
 export function buildCategoryPrompt(params: PromptParams): string {

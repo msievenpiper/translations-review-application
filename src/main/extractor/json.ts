@@ -1,5 +1,5 @@
 export interface TranslationPair {
-  key:   string
+  key: string
   value: string
 }
 
